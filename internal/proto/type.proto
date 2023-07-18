@@ -2,6 +2,18 @@ syntax = "proto3";
 
 option go_package = "github.com/hnamzian/goblock/internal/proto";
 
+service Node {
+    rpc Handshake(Version) returns (Version);
+    rpc HandleTransaction(Transaction) returns (Ack);
+}
+
+message Ack {}
+
+message Version {
+    string Version = 1;
+    int32 Height = 2;
+}
+
 message Block {
     Header header = 1;
     repeated Transaction transactions = 2;
