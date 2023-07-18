@@ -1,4 +1,4 @@
-package key
+package crypto
 
 import (
 	"crypto/ed25519"
@@ -46,6 +46,13 @@ func (k PrivateKey) Bytes() []byte {
 	return k.key
 }
 
+func PrivateKeyFromBytes(b []byte) PrivateKey {
+	if len(b) != ed25519.PrivateKeySize {
+		panic("invalid private key length")
+	}
+	return PrivateKey{key: b}
+}
+
 func (k PrivateKey) PublicKey() PublicKey {
 	return PublicKey{
 		key: k.key.Public().(ed25519.PublicKey),
@@ -60,6 +67,13 @@ func (k PrivateKey) Sign(data []byte) Signature {
 
 type PublicKey struct {
 	key ed25519.PublicKey
+}
+
+func PublicKeyFromBytes(b []byte) PublicKey {
+	if len(b) != ed25519.PublicKeySize {
+		panic("invalid public key length")
+	}
+	return PublicKey{key: b}
 }
 
 func (k PublicKey) Bytes() []byte {
@@ -78,6 +92,13 @@ func (k PublicKey) Verify(data []byte, sig []byte) bool {
 
 type Signature struct {
 	value []byte
+}
+
+func SignatureFromBytes(b []byte) Signature {
+	if len(b) != ed25519.SignatureSize {
+		panic("invalid signature length")
+	}
+	return Signature{value: b}
 }
 
 func (s Signature) Bytes() []byte {
