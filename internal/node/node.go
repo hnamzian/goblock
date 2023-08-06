@@ -42,7 +42,7 @@ func (n *Node) Handshake(ctx context.Context, version *proto.Version) (*proto.Ve
 	n.addPeer(nc, version)
 
 	fmt.Printf("[Server] Received version from %s\n", peer.Addr)
-	return &proto.Version{Version: n.version}, nil
+	return n.getMyVersion(), nil
 }
 
 func (n *Node) HandleTransaction(ctx context.Context, tx *proto.Transaction) (*proto.Ack, error) {
@@ -71,4 +71,11 @@ func (n *Node) removePeer(addr string) {
 	fmt.Printf("Removing peer %s\n", addr)
 
 	delete(n.peers, addr)
+}
+
+func (n *Node) getMyVersion() *proto.Version {
+	return &proto.Version{
+		Version: n.version,
+		Address: n.addr,
+	}
 }
