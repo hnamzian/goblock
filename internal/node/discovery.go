@@ -15,8 +15,9 @@ func (n *Node) monitor() {
 	// n.plock.Lock()
 	// defer n.plock.Unlock()
 	for {
-		for addr, client := range n.peers {
-			_, err := client.Handshake(context.Background(), &proto.Version{Version: n.version, Address: n.addr, Height: 0})
+		for addr, peer := range n.peers {
+			myVersion := n.getMyVersion()
+			_, err := peer.Client.Handshake(context.Background(), myVersion)
 			if err != nil {
 				fmt.Printf("Error to handshake with %s: %s\n", addr, err)
 				n.removePeer(addr)
