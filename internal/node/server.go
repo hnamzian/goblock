@@ -3,13 +3,14 @@ package node
 import (
 	"fmt"
 	"net"
+	"time"
 
 	"github.com/hnamzian/goblock/internal/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
-func (n *Node) Start() error {
+func (n *Node) Start(staticNodes []string) error {
 	opts := []grpc.ServerOption{}
 	gs := grpc.NewServer(opts...)
 
@@ -23,6 +24,16 @@ func (n *Node) Start() error {
 	}
 
 	fmt.Printf("Server Running on Port %s\n", n.addr)
+
+	go func() {
+		n.bootstrap(staticNodes)
+	}()
+
+	go func() {
+		time.Sleep(5 * time.Second)
+		n.monitor()	
+	}()
+	
 
 	return gs.Serve(ln)
 }
