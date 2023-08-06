@@ -13,6 +13,7 @@ message Version {
     string Version = 1;
     int32 Height = 2;
     string Address = 3;
+    repeated string Peers = 4;
 }
 
 message Block {
