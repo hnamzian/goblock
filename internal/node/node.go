@@ -15,9 +15,14 @@ type Node struct {
 	version string
 
 	plock sync.RWMutex
-	peers map[string]proto.NodeClient
+	peers map[string]Peer
 
 	proto.UnimplementedNodeServer
+}
+
+type Peer struct {
+	Version *proto.Version
+	Client proto.NodeClient
 }
 
 type Config struct {
@@ -28,7 +33,7 @@ func New(cfg *Config) *Node {
 	return &Node{
 		addr:    cfg.Addr,
 		version: "0.0.1",
-		peers:   make(map[string]proto.NodeClient),
+		peers:   make(map[string]Peer),
 	}
 }
 
@@ -55,13 +60,18 @@ func (n *Node) addPeer(client proto.NodeClient, v *proto.Version) {
 	n.plock.Lock()
 	defer n.plock.Unlock()
 
-	if (n.peers[v.Address] != nil) {
-		// fmt.Printf("Skip Adding Peer %s already exists\n", v.Address)
+	if (n.peers[v.Address] != Peer{}) {
+		fmt.Printf("Skip Adding Peer %s already exists\n", v.Address)
 		return
 	}
 
+	fmt.Printf("My Address: %s, PeerList: %v\n", n.addr, v.Peers)
+
 	fmt.Printf("Adding peer %s version: %s\n", v.Address, v.Version)
-	n.peers[v.Address] = client
+	n.peers[v.Address] = Peer{
+		Version: v,
+		Client: client,
+	}
 }
 
 func (n *Node) removePeer(addr string) {
@@ -77,5 +87,18 @@ func (n *Node) getMyVersion() *proto.Version {
 	return &proto.Version{
 		Version: n.version,
 		Address: n.addr,
+		Peers: n.getPeerList(),
 	}
+}
+
+func (n *Node) getPeerList() []string {
+	n.plock.RLock()
+	defer n.plock.RUnlock()
+
+	peers := []string{}
+	for _, peer := range n.peers {
+		peers = append(peers, peer.Version.Address)
+	}
+
+	return peers
 }
