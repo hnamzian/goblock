@@ -1,27 +1,22 @@
 package main
 
 import (
-	"fmt"
-	"net"
-
+	"github.com/hnamzian/goblock/internal/config"
 	"github.com/hnamzian/goblock/internal/node"
-	"github.com/hnamzian/goblock/internal/proto"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 )
 
 func main() {
-	opts := []grpc.ServerOption{}
-	grpcServer := grpc.NewServer(opts...)
+	cfg, _ := config.GetConfigs()
 
-	ln, err := net.Listen("tcp", ":8080")
-	if err != nil {
-		panic(err)
+	nodeCfg := &node.Config{
+		Addr: cfg.Addr,
+	}
+	n := node.New(nodeCfg)
+
+	staticNodes := []string{
+		"localhost:8080",
+		"localhost:8081",
 	}
 
-	proto.RegisterNodeServer(grpcServer, node.New())
-	fmt.Printf("Server started at %s\n", ln.Addr())
-	// enable reflection
-	reflection.Register(grpcServer)
-	grpcServer.Serve(ln)
+	n.Start(staticNodes)
 }
