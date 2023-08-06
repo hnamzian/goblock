@@ -46,6 +46,9 @@ func (n *Node) Handshake(ctx context.Context, version *proto.Version) (*proto.Ve
 	}
 	n.addPeer(nc, version)
 
+	// bootstrap with the peer list of the client
+	n.bootstrap(version.Peers)
+
 	fmt.Printf("[Server] Received version from %s\n", peer.Addr)
 	return n.getMyVersion(), nil
 }
